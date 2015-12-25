@@ -1,0 +1,61 @@
+<jittershader name="biocell">
+    <description>
+    http://glslsandbox.com/e#29239.1
+    </description>
+    <param name="time" type="float" default="1" />
+    <param name="resolution" type="vec2" default="1. 1." />
+    <language name="glsl" version="1.2">
+        <bind param="time" program="fp" />
+        <bind param="resolution" program="fp" />
+        <program name="vp" type="vertex" source="sh.passthru.xform.vp.glsl" />
+        <program name="fp" type="fragment">
+<![CDATA[
+
+#version 120
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+#define pi 3.14159
+
+uniform float time;
+uniform vec2 resolution;
+
+const float dotsnb = 30.0; // Number of dots
+
+vec3 hsv2rgb (vec3 hsv) { // from HSV to RGB color vector
+    hsv.yz = clamp (hsv.yz, 0.0, 1.0);
+    return hsv.z * (1.0 + 0.63 * hsv.y * (cos (2.0 * 3.14159 * (hsv.x + vec3 (0.0, 2.0 / 3.0, 1.0 / 3.0))) - 1.0));
+}
+
+
+void main( void ) {
+
+    float mx = max(resolution.x, resolution.y);
+    vec2 scrs = resolution/mx;
+    vec2 uv = vec2(gl_FragCoord.x, resolution.y-gl_FragCoord.y)/mx;
+    //vec2 m = vec2(mouse.x/scrs.x,mouse.y*(scrs.y/scrs.x));
+
+    vec2 pos  = vec2(0.0);         // Position of the dots
+    vec3 col = vec3(0.0);         // Color of the dots
+    float radius = 0.15;        // Radius of the circle
+    float intensity = 1.0/500.0;    // Light intensity
+
+    for(float i = 0.0 ; i<dotsnb ; i++){
+
+        pos = vec2(radius*cos(2.0*pi*i/dotsnb+time*(8.0)/3.0),
+                radius*sin(2.0*pi*i/dotsnb+time*(4.0)/3.0));
+
+        col += hsv2rgb(vec3(i/dotsnb, distance(uv,scrs/2.0 + pos)*(1.0/intensity), intensity/distance(uv,scrs/2.0 + pos)));
+        col += hsv2rgb(vec3(i/dotsnb, distance(uv,scrs/1.0 - pos)*(1.0/intensity), intensity/distance(uv,scrs/2.1 + pos)/2.0));
+    }
+
+    gl_FragColor = vec4( col-0.2, 1.1 );
+
+}
+
+]]>
+        </program>
+    </language>
+</jittershader>
+

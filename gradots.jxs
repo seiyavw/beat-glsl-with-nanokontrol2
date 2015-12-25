@@ -1,0 +1,38 @@
+<jittershader name="biocell">
+    <description>
+    http://glslsandbox.com/e#29579.3
+    </description>
+    <param name="time" type="float" default="1" />
+    <param name="resolution" type="vec2" default="1. 1." />
+    <language name="glsl" version="1.2">
+        <bind param="time" program="fp" />
+        <bind param="resolution" program="fp" />
+        <program name="vp" type="vertex" source="sh.passthru.xform.vp.glsl" />
+        <program name="fp" type="fragment">
+<![CDATA[
+
+#version 120
+#ifdef GL_ES
+precision mediump float;
+#endif
+// variables
+uniform float time;
+uniform vec2 resolution;
+
+// ehh. colors
+void main(void) {
+    vec2 re = resolution;
+    float tt = time;
+    float color = 0.0;
+    vec4 res = vec4( int(mod(gl_FragCoord.x*1.75, 2.))-int( mod(gl_FragCoord.y*1.75, 2.)), int(mod(gl_FragCoord.x*1.75, 2.))-int( mod(gl_FragCoord.y*1.75, 2.)), int(mod(gl_FragCoord.x*1.75, 2.))-int( mod(gl_FragCoord.y*1.75, 2.)), 1.0 );
+    res.r -= abs(sin(gl_FragCoord.x/50.+time));
+    res.b -= abs(cos(gl_FragCoord.y/50.+time));
+    res.g -= abs(tan((gl_FragCoord.x + gl_FragCoord.y)/150.-time));
+    gl_FragColor = res;
+}
+
+]]>
+        </program>
+    </language>
+</jittershader>
+

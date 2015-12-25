@@ -1,0 +1,64 @@
+<jittershader name="biocell">
+    <description>
+    http://glslsandbox.com/e#29234.0
+    </description>
+    <param name="time" type="float" default="1" />
+    <param name="resolution" type="vec2" default="1. 1." />
+    <language name="glsl" version="1.2">
+        <bind param="time" program="fp" />
+        <bind param="resolution" program="fp" />
+        <program name="vp" type="vertex" source="sh.passthru.xform.vp.glsl" />
+        <program name="fp" type="fragment">
+<![CDATA[
+
+#version 120
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+uniform float time;
+uniform vec2 resolution;
+
+float smoothstep(float edge0, float edge1, float x) {
+    float t;
+    t = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
+    return t * t * (3.0 - 2.0 * t);
+}
+
+vec3 mix(vec3 x, vec3 y, float a) {
+    return x * (1.0 - a) + y * a;
+}
+
+void main( void ) {
+    vec2 mouse = vec2(.5, .5);
+    vec2 uv = gl_FragCoord.xy / resolution.xy;
+    vec2 aspect = vec2(resolution.x / resolution.y, 1.0);
+    vec2 p = (uv * 2.0 - 1.0) * aspect;
+    p*=1.0;
+    vec2 mt = (mouse * 2.0 - 1.0) * aspect;
+    vec3 c = vec3(0.0);
+    float t2 = time*0.1+200.0;
+
+    for(float i = 0.0; i < 100.0; i++) {
+        float r = cos(i * 1000.0);
+        vec2 cp = vec2(r + sin(t2*(r+0.5)*0.5), (cos(t2*0.5*(r+0.5)))*1.1);
+        float d = distance(cp, p) / (0.08+distance(cp, mt)*0.1);
+        float a = pow(sin(t2*48.0 + r), 0.66);
+        float e = smoothstep(-a*0.3, 0.1, 1.0 - d)-0.001;
+        c += (e) * mix(vec3(0.0, 0.1, 0.9), vec3(0.0, 0.5, 0.9), a);
+    }
+
+    c *= 0.5;
+    c *= smoothstep(-1.5, 1.0, 1.0 - length(p))*0.9;
+    c = pow(c, vec3(0.7, 0.7, 1.0));
+    c -= 0.05;
+    c+= fract(sin(dot(p, vec2(344.4, 864.0))*5.35)*2336.7)*0.02;
+    gl_FragColor = vec4(c, 1.0);
+}
+
+]]>
+        </program>
+    </language>
+</jittershader>
+
+

@@ -1,0 +1,65 @@
+<jittershader name="biocell">
+    <description>
+    http://glslsandbox.com/e#29656.1
+    </description>
+    <param name="time" type="float" default="1" />
+    <param name="resolution" type="vec2" default="1. 1." />
+    <language name="glsl" version="1.2">
+        <bind param="time" program="fp" />
+        <bind param="resolution" program="fp" />
+        <program name="vp" type="vertex" source="sh.passthru.xform.vp.glsl" />
+        <program name="fp" type="fragment">
+<![CDATA[
+
+#version 120
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+uniform float time;
+uniform vec2 resolution;
+
+vec3 mix(vec3 x, vec3 y, float a) {
+    return x * (1.0 - a) + y * a;
+}
+
+// TODO:
+vec4 min(vec4 a, vec4 b) {
+    vec4 o = vec4(0.0);
+    o.x = (a.x < b.x) ? a.x : b.x;
+    o.y = (a.y < b.y) ? a.y : b.y;
+    o.z = (a.z < b.z) ? a.z : b.z;
+    o.w = (a.w < b.w) ? a.w : b.w;
+    return o;
+}
+
+void main(void){
+    float t = time;
+    vec2 mouse = vec2(.5,.5);
+    vec2 p = gl_FragCoord.xy / resolution.xy;
+    vec4 dmin = vec4(1000.);
+    vec2 z = (-1.0 + 2.0*p)*vec2(1.7,1.0);
+    float w = .1 * p.x * p.y;
+    vec2 op = 1./p;
+    vec2 mv = ((mouse-vec2(0.5))+vec2(1./acos(op.x*w),1.-atan(op.y*w)));
+    for(int i=0; i<4; i++){
+        z = mv+vec2(z.x*z.x-z.y*z.y,2.0*z.x*z.y);
+        mv /= mv*.0005;
+        z += z*0.05;
+        dmin=min(dmin,vec4(abs(0.0+z.y+0.5*sin(z.x)),abs(1.0+z.x+0.5*sin(z.y)),dot(z,z),length(fract(z)-0.5)));
+    }
+    vec3 color = vec3( mix(vec3(dot(dmin.rgb, -dmin.gba)), dmin.rgb, 1.0-dmin.a) );
+    color = mix( color, vec3(1.00,1.00,0.00),  1.00-min(1.0,pow(dmin.z*1.00,0.15)));
+    color = mix( color, vec3(0.00,1.00,1.00),  1.00-min(1.0,pow(dmin.x*0.25,0.20)));
+    color = mix( color, vec3(1.00,0.00,1.00),  1.00-min(1.0,pow(dmin.y*0.50,0.50)));
+    color = mix( color, vec3(1.00,1.00,0.00),  1.00-min(1.0,pow(dmin.z*1.00,0.15)));
+    color = 1.25 * color*color;
+    gl_FragColor = vec4(1.0-color*(0.5 + 0.5*pow(16.0*p.x*(1.0-p.x)*p.y*(1.0-p.y),0.15)),1.0);
+}
+
+]]>
+        </program>
+    </language>
+</jittershader>
+
+
