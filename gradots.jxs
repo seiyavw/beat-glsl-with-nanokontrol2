@@ -4,9 +4,11 @@
     </description>
     <param name="time" type="float" default="1" />
     <param name="resolution" type="vec2" default="1. 1." />
+    <param name="gain" type="float" default=".5" />
     <language name="glsl" version="1.2">
         <bind param="time" program="fp" />
         <bind param="resolution" program="fp" />
+        <bind param="gain" program="fp" />
         <program name="vp" type="vertex" source="sh.passthru.xform.vp.glsl" />
         <program name="fp" type="fragment">
 <![CDATA[
@@ -18,13 +20,16 @@ precision mediump float;
 // variables
 uniform float time;
 uniform vec2 resolution;
+uniform float gain;
 
 // ehh. colors
 void main(void) {
-    vec2 re = resolution;
-    float tt = time;
+
+    vec2 p = (gl_FragCoord.xy * 2.0 - resolution) / min(resolution.x, resolution.y);
     float color = 0.0;
-    vec4 res = vec4( int(mod(gl_FragCoord.x*1.75, 2.))-int( mod(gl_FragCoord.y*1.75, 2.)), int(mod(gl_FragCoord.x*1.75, 2.))-int( mod(gl_FragCoord.y*1.75, 2.)), int(mod(gl_FragCoord.x*1.75, 2.))-int( mod(gl_FragCoord.y*1.75, 2.)), 1.0 );
+    /* float step = 1.75+gain*length(p); */
+    float step = 1.75+gain;
+    vec4 res = vec4( int(mod(gl_FragCoord.x*step, 2.))-int( mod(gl_FragCoord.y*step, 2.)), int(mod(gl_FragCoord.x*step, 2.))-int( mod(gl_FragCoord.y*step, 2.)), int(mod(gl_FragCoord.x*step, 2.))-int( mod(gl_FragCoord.y*step, 2.)), 1.0 );
     res.r -= abs(sin(gl_FragCoord.x/50.+time));
     res.b -= abs(cos(gl_FragCoord.y/50.+time));
     res.g -= abs(tan((gl_FragCoord.x + gl_FragCoord.y)/150.-time));

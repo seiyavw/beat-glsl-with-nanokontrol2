@@ -4,9 +4,11 @@
     </description>
     <param name="time" type="float" default="1" />
     <param name="resolution" type="vec2" default="1. 1." />
+    <param name="gain" type="float" default=".5" />
     <language name="glsl" version="1.2">
         <bind param="time" program="fp" />
         <bind param="resolution" program="fp" />
+        <bind param="gain" program="fp" />
         <program name="vp" type="vertex" source="sh.passthru.xform.vp.glsl" />
         <program name="fp" type="fragment">
 <![CDATA[
@@ -20,6 +22,7 @@ precision mediump float;
 
 uniform float time;
 uniform vec2 resolution;
+uniform float gain;
 
 const float dotsnb = 30.0; // Number of dots
 
@@ -30,6 +33,8 @@ vec3 hsv2rgb (vec3 hsv) { // from HSV to RGB color vector
 
 
 void main( void ) {
+
+    float _gain = gain;
 
     float mx = max(resolution.x, resolution.y);
     vec2 scrs = resolution/mx;

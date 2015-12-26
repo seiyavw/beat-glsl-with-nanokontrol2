@@ -4,10 +4,12 @@
     </description>
     <param name="time" type="float" default="1" />
     <param name="resolution" type="vec2" default="1. 1." />
+    <param name="gain" type="float" default=".5" />
     <param name="vl1" type="vec4" default="0. 0. 0. 0" />
     <language name="glsl" version="1.2">
         <bind param="time" program="fp" />
         <bind param="resolution" program="fp" />
+        <bind param="gain" program="fp" />
         <bind param="vl1" program="fp" />
         <program name="vp" type="vertex" source="sh.passthru.xform.vp.glsl" />
         <program name="fp" type="fragment">
@@ -25,6 +27,7 @@ varying vec2 texcoord0;
 // variables
 uniform float time;
 uniform vec2 resolution;
+uniform float gain;
 uniform vec4 vl1;
 
 float hash( float n )
@@ -79,9 +82,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     vec2 uv = (fragCoord.xy-resolution.xy/2.0) / resolution.yy * 8.0;
     uv.y = -uv.y;
 
-
     // perspective projection
-    vec3 ro = vec3(0.5,0.5,time*6.0);
+    vec3 ro = vec3(0.5,0.5,time*6.0) * (gain + 0.5);
     vec3 rd = normalize(vec3(uv+vec2(0.01,0.01),1.0));
 
     ivec3 ip;
