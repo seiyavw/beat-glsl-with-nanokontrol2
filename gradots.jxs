@@ -2,13 +2,17 @@
     <description>
     http://glslsandbox.com/e#29579.3
     </description>
-    <param name="time" type="float" default="1" />
+    <param name="time" type="float" default="1." />
     <param name="resolution" type="vec2" default="1. 1." />
     <param name="gain" type="float" default=".5" />
+    <param name="vl1" type="vec4" default="0. 0. 0. 0" />
+    <param name="sl1" type="vec4" default="0. 0. 0. 0" />
     <language name="glsl" version="1.2">
         <bind param="time" program="fp" />
         <bind param="resolution" program="fp" />
         <bind param="gain" program="fp" />
+        <bind param="vl1" program="fp" />
+        <bind param="sl1" program="fp" />
         <program name="vp" type="vertex" source="sh.passthru.xform.vp.glsl" />
         <program name="fp" type="fragment">
 <![CDATA[
@@ -21,9 +25,14 @@ precision mediump float;
 uniform float time;
 uniform vec2 resolution;
 uniform float gain;
+uniform vec4 vl1;
+uniform vec4 sl1;
 
 // ehh. colors
 void main(void) {
+
+    vec4 _vl1 = vl1;
+    vec4 _sl1 = sl1;
 
     vec2 p = (gl_FragCoord.xy * 2.0 - resolution) / min(resolution.x, resolution.y);
     float color = 0.0;

@@ -5,10 +5,14 @@
     <param name="time" type="float" default="1." />
     <param name="resolution" type="vec2" default="1. 1." />
     <param name="gain" type="float" default=".5" />
+    <param name="vl1" type="vec4" default="0. 0. 0. 0" />
+    <param name="sl1" type="vec4" default="0. 0. 0. 0" />
     <language name="glsl" version="1.2">
         <bind param="time" program="fp" />
         <bind param="resolution" program="fp" />
         <bind param="gain" program="fp" />
+        <bind param="vl1" program="fp" />
+        <bind param="sl1" program="fp" />
         <program name="vp" type="vertex" source="sh.passthru.xform.vp.glsl" />
         <program name="fp" type="fragment">
 <![CDATA[
@@ -21,12 +25,13 @@ precision mediump float;
 uniform float time;
 uniform vec2 resolution;
 uniform float gain;
+uniform vec4 vl1;
+uniform vec4 sl1;
 
 vec3 mix(vec3 x, vec3 y, float a) {
     return x * (1.0 - a) + y * a;
 }
 
-// TODO:
 vec4 min(vec4 a, vec4 b) {
     vec4 o = vec4(0.0);
     o.x = (a.x < b.x) ? a.x : b.x;
@@ -38,25 +43,30 @@ vec4 min(vec4 a, vec4 b) {
 
 void main(void){
 
-    vec2 mouse = vec2(gain, gain);
+    float _time = time;
+    vec4 _sl1 = sl1;
+    vec4 _vl1 = vl1;
+
+    vec2 mouse = vec2(0.0,0.0);
     vec2 p = gl_FragCoord.xy / resolution.xy;
-    vec4 dmin = vec4(1000.);
+    /* vec4 dmin = vec4(1000. * ((1.0 - vl1.x) * 0.001 + 0.001)); */
+    vec4 dmin = vec4(1000. * ((2.0 - gain*2.0) * 0.001 + 0.001));
     vec2 z = (-1.0 + 2.0*p)*vec2(1.7,1.0);
     float w = .1 * p.x * p.y;
     vec2 op = 1./p;
-    vec2 mv = ((mouse-vec2(0.5))+vec2(1./acos(op.x*w),1.-atan(op.y*w)));
+    vec2 mv = ((mouse-vec2(0.5))+vec2(1./acos(op.x*w),1.-atan(op.y*w))) + gain;
     for(int i=0; i<4; i++){
-        z = mv+vec2(z.x*z.x-z.y*z.y,2.0*z.x*z.y);
+        z = mv+vec2(z.x*z.x-z.y*z.y,(1.0 - sl1.y)*2.0 *z.x*z.y);
         mv /= mv*.0005;
         z += z*0.05;
-        dmin=min(dmin,vec4(abs(0.0+z.y+0.5*sin(z.x)),abs(1.0+z.x+0.5*sin(z.y)),dot(z,z),length(fract(z)-0.5)));
+        dmin=min(dmin,vec4(abs(0.0+z.y+0.5*sin(z.x)),abs(1.0+z.x+0.5*sin(z.y)),dot(z,z),length(fract(z)-0.5 + sl1.x)));
     }
     vec3 color = vec3( mix(vec3(dot(dmin.rgb, -dmin.gba)), dmin.rgb, 1.0-dmin.a) );
     color = mix( color, vec3(1.00,1.00,0.00), 1.00-min(1.0,pow(dmin.z*1.00,0.15)));
     color = mix( color, vec3(0.00,1.00,1.00), 1.00-min(1.0,pow(dmin.x*0.25,0.20)));
     color = mix( color, vec3(1.00,0.00,1.00), 1.00-min(1.0,pow(dmin.y*0.50,0.50)));
     color = mix( color, vec3(1.00,1.00,0.00), 1.00-min(1.0,pow(dmin.z*1.00,0.15)));
-    color = 1.25 * color*color * abs(sin(time * (gain * 0.8)));
+    color = 1.25 * color*color;
     gl_FragColor = vec4(1.0-color*(0.5 + 0.5*pow(16.0*p.x*(1.0-p.x)*p.y*(1.0-p.y),0.15)),1.0);
 }
 
