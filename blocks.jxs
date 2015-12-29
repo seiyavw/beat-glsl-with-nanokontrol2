@@ -115,6 +115,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     col += 0.2*glow;
     col += float(n.z)*0.5;
     col *= 8.0/pow(length(pos.z-ro.z),1.6);
+    col += (gain + 0.2);
 
     fragColor = vec4(col,1.0);
 }

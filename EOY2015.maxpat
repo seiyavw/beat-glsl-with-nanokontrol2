@@ -9,7 +9,7 @@
 			"modernui" : 1
 		}
 ,
-		"rect" : [ 65.0, 99.0, 955.0, 702.0 ],
+		"rect" : [ 127.0, 100.0, 893.0, 702.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -294,7 +294,7 @@
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 407.5, 690.0, 98.0, 22.0 ],
 					"style" : "",
-					"text" : "blocks.jxs"
+					"text" : "fireball.jxs"
 				}
 
 			}
@@ -344,9 +344,9 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 260.5, 525.5, 351.0, 22.0 ],
+					"patching_rect" : [ 260.5, 525.5, 311.0, 22.0 ],
 					"style" : "",
-					"text" : "1 biocell, 2 blocks, 3 blurbubble, 4 gradots, 5 gradring, 6 plazma"
+					"text" : "1 biocell, 2 mono, 3 blocks, 4 fireball, 5 bioball, 6 plazma"
 				}
 
 			}
@@ -408,7 +408,7 @@
 , 			{
 				"box" : 				{
 					"autosize" : 1,
-					"columns" : 6,
+					"columns" : 7,
 					"id" : "obj-3",
 					"maxclass" : "matrixctrl",
 					"numinlets" : 1,
@@ -416,8 +416,8 @@
 					"one/matrix" : 1,
 					"outlettype" : [ "list", "list" ],
 					"parameter_enable" : 0,
-					"patching_rect" : [ 131.0, 240.0, 98.0, 18.0 ],
-					"presentation_rect" : [ 0.0, 0.0, 96.0, 16.0 ],
+					"patching_rect" : [ 131.0, 240.0, 114.0, 18.0 ],
+					"presentation_rect" : [ 0.0, 0.0, 112.0, 16.0 ],
 					"rows" : 1,
 					"style" : ""
 				}

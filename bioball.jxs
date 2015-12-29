@@ -1,0 +1,118 @@
+<jittershader name="biocell">
+    <description>
+    http://glslsandbox.com/e#27730.0
+    </description>
+    <param name="time" type="float" default="1." />
+    <param name="resolution" type="vec2" default="1. 1." />
+    <param name="gain" type="float" default=".5" />
+    <param name="vl1" type="vec4" default="0. 0. 0. 0" />
+    <param name="sl1" type="vec4" default="0. 0. 0. 0" />
+    <language name="glsl" version="1.2">
+        <bind param="time" program="fp" />
+        <bind param="resolution" program="fp" />
+        <bind param="gain" program="fp" />
+        <bind param="vl1" program="fp" />
+        <bind param="sl1" program="fp" />
+        <program name="vp" type="vertex" source="sh.passthru.xform.vp.glsl" />
+        <program name="fp" type="fragment">
+<![CDATA[
+
+#version 120
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+uniform float gain;
+uniform vec4 vl1;
+uniform vec4 sl1;
+
+#define PI 3.14159
+uniform float time;
+uniform vec2 resolution;
+
+vec3 mix(vec3 x, vec3 y, float a) {
+    return x * (1.0 - a) + y * a;
+}
+
+float dist(vec3 pos) {
+    pos = mod(pos, 2.) - 1.;
+    pos = mix(pos, pos*gain, .4);
+    return length(pos) - (sin(time * .5) + 2.) * .3;
+}
+
+float snoise(vec3 uv, float res)
+{
+    const vec3 s = vec3(1e0, 1e2, 1e3);
+    uv *= res;
+    vec3 uv0 = floor(mod(uv, res))*s;
+    vec3 uv1 = floor(mod(uv+vec3(1.), res))*s;
+    vec3 f = fract(uv); f = f*f*(3.0-2.0*f);
+    vec4 v = vec4(uv0.x+uv0.y+uv0.z, uv1.x+uv0.y+uv0.z,
+                    uv0.x+uv1.y+uv0.z, uv1.x+uv1.y+uv0.z);
+    vec4 r = fract(sin(v*1e-1)*1e3);
+    float r0 = mix(mix(r.x, r.y, f.x), mix(r.z, r.w, f.x), f.y);
+    r = fract(sin((v + uv1.z - uv0.z)*1e-1)*1e3);
+    float r1 = mix(mix(r.x, r.y, f.x), mix(r.z, r.w, f.x), f.y);
+    return mix(r0, r1, f.z)*2.-1.;
+}
+
+//http://www.iquilezles.org/www/articles/palettes/palettes.htm
+vec3 palette( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d ){
+    return a + b*cos( 6.28318*(c*t+d) );
+}
+vec3 color_from_palette(float v){
+    return palette(v, vec3(0.5, 0.5, 0.5), vec3(0.5, 0.5, 0.5), vec3(1.0, 1.0, 1.0), vec3(0.00, 0.33, 0.67));
+}
+vec3 ray(vec3 pos, vec3 dir) {
+    vec3 start = pos;
+    float d = 0.;
+    int r = 0;
+    vec2 e = vec2(.001, 0.);
+    vec3 lp = vec3(sin(time), 3, -.3);
+    vec3 col = vec3(0.);
+    float tb = 1.;
+    for(int i=0 ; i<40 ; i++) {
+        d = dist(pos);
+        if(d < .001) {
+            vec3 normal = vec3(0.);
+            normal.x += dist(pos + e.xyy) - dist(pos - e.xyy);
+            normal.y += dist(pos + e.yxy) - dist(pos - e.yxy);
+            normal.z += dist(pos + e.yyx) - dist(pos - e.yyx);
+            normal = normalize(normal)*sin(time*.5+gain*2.0);
+            r++;
+            if(r == 4) break;
+            tb = dot(normal, normalize(lp - pos));
+            float td = length(pos - start);
+            col+=color_from_palette(abs(mod(tb*(sin(td) * .5 + .5+ sin(td + PI * 2. / 3.) * .5 + .5+ sin(td + PI * 4. / 3.) * .5 + .5)*.5, 2.)-1.))*.4;
+            //col += tb * vec3(sin(td) * .5 + .5, sin(td + PI * 2. / 3.) * .5 + .5, sin(td + PI * 4. / 3.) * .5 + .5);
+            dir = -(2. * dot(dir, normal) * normal - dir);
+            pos += dir;
+        }
+        pos += d * dir;
+    }
+    return vec3(min(col, 1.));
+}
+void main( void ) {
+
+    vec4 _sl1 = sl1;
+    vec4 _vl1 = vl1;
+
+    vec2 uv = gl_FragCoord.xy / resolution.xy * 2. - 1.;
+    uv.x *= resolution.x / resolution.y;
+    vec3 pos = vec3(time*.4, 0, 0);
+    vec3 forward = normalize(vec3(cos(time*.2), sin(time*.2), 0.));
+    vec3 up = vec3(0, cos(time*.2), sin(time*.2));
+    vec3 right = cross(forward, up);
+    up = cross(right, forward);
+    vec3 dir = normalize(forward*2. + right*uv.x + up*uv.y);
+    vec3 col = ray(pos, dir);
+    gl_FragColor = vec4(col, 1.);
+}
+
+]]>
+        </program>
+    </language>
+</jittershader>
+
+
+

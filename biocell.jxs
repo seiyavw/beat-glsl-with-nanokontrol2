@@ -50,7 +50,7 @@ void main(void){
     vec2 mouse = vec2(0.0,0.0);
     vec2 p = gl_FragCoord.xy / resolution.xy;
     /* vec4 dmin = vec4(1000. * ((1.0 - vl1.x) * 0.001 + 0.001)); */
-    vec4 dmin = vec4(1000. * ((2.0 - gain*2.0) * 0.001 + 0.001));
+    vec4 dmin = vec4(1000. * ((2.0 - gain*3.0) * 0.001 + 0.001));
     vec2 z = (-1.0 + 2.0*p)*vec2(1.7,1.0);
     float w = .1 * p.x * p.y;
     vec2 op = 1./p;

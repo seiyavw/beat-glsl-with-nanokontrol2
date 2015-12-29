@@ -1,0 +1,70 @@
+<jittershader name="biocell">
+    <description>
+    http://glslsandbox.com/e#28474.1
+    </description>
+    <param name="time" type="float" default="1." />
+    <param name="resolution" type="vec2" default="1. 1." />
+    <param name="gain" type="float" default=".5" />
+    <param name="vl1" type="vec4" default="0. 0. 0. 0" />
+    <param name="sl1" type="vec4" default="0. 0. 0. 0" />
+    <language name="glsl" version="1.2">
+        <bind param="time" program="fp" />
+        <bind param="resolution" program="fp" />
+        <bind param="gain" program="fp" />
+        <bind param="vl1" program="fp" />
+        <bind param="sl1" program="fp" />
+        <program name="vp" type="vertex" source="sh.passthru.xform.vp.glsl" />
+        <program name="fp" type="fragment">
+
+<![CDATA[
+
+#version 120
+
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+//setup for single texture
+varying vec2 texcoord0;
+
+// variables
+uniform float time;
+uniform vec2 resolution;
+uniform float gain;
+uniform vec4 vl1;
+uniform vec4 sl1;
+
+void main( void ) {
+
+    float _gain = gain;
+    vec4 _sl1 = sl1;
+    vec4 _vl1 = vl1;
+
+    vec2 mouse = vec2(abs(sin(time*0.5))*gain, abs(cos(time* 0.5))*gain);
+    vec2 uv = (gl_FragCoord.xy / resolution.xy)-0.5;
+    uv.x *= resolution.x / resolution.y;
+    float t = time*.01;
+    float k = cos(t);
+    float l = sin(t);
+
+    float s = .99;
+
+    s = fract(mouse.y+length(uv));
+    //s = cos(cos(fract(time*length(uv))));
+
+    for(int i=0; i<96; ++i) {
+        uv  = abs(uv) - s;    // Mirror
+        uv *= mat2(k,-l,l,k); // Rotate
+        s  *= (1.-0.15*mouse.x);         // Scale
+    }
+
+    float x = cos(6.28318*(1200.*length(uv)));
+    gl_FragColor = vec4(vec3(x),1);
+}
+
+]]>
+        </program>
+    </language>
+</jittershader>
+
+
